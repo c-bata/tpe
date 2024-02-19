@@ -80,6 +80,7 @@ pub fn histogram_estimator() -> DefaultEstimatorBuilder {
 pub struct TpeOptimizerBuilder {
     gamma: f64,
     candidates: usize,
+    trials_cap: usize,
 }
 
 impl TpeOptimizerBuilder {
@@ -104,6 +105,14 @@ impl TpeOptimizerBuilder {
         self
     }
 
+    /// Sets the capacity for the vector of trials.
+    ///
+    /// The default value is `100`.
+    pub fn with_capacity(&mut self, capacity: usize) -> &mut Self {
+        self.trials_cap = capacity;
+        self
+    }
+
     /// Builds a [`TpeOptimizer`] with the given settings.
     pub fn build<T>(
         &self,
@@ -120,7 +129,7 @@ impl TpeOptimizerBuilder {
         Ok(TpeOptimizer {
             param_range,
             estimator_builder,
-            trials: Vec::new(),
+            trials: Vec::with_capacity(self.trials_cap),
             is_sorted: false,
             gamma: self.gamma,
             candidates: NonZeroUsize::new(self.candidates).ok_or(BuildError::ZeroCandidates)?,
@@ -133,6 +142,7 @@ impl Default for TpeOptimizerBuilder {
         Self {
             gamma: 0.1,
             candidates: 24,
+            trials_cap: 100,
         }
     }
 }
